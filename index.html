@@ -1,0 +1,100 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Simple Chats</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-KK94CHFLLe+nY2dmCWGMq91rCGa5gtU4mk92HdvYe+M/SXH301p5ILy+dN9+nJOZ" crossorigin="anonymous">
+  </head>
+  <body>
+    <main class="container-fluid p-5">
+        <div class="d-flex flex-column  justify-content-center align-items-center">
+            <form action="#" class="w-50" name="userForm">
+                <div class="input-group">
+                    <input type="text" name="user" placeholder="User..." class="form-control" id="user">
+                    <button type="submit" class="btn btn-primary">Get Chat</button>
+                </div>
+            </form>
+            <form action="#" class="w-50 mt-2" name="targetForm">
+                <div class="input-group">
+                    <input type="text" name="target" placeholder="User Target..." class="form-control" id="target">
+                    <button type="submit" class="btn btn-primary">Set Target</button>
+                </div>
+            </form>
+            <div class="card card-primary card-outline direct-chat direct-chat-primary w-50 mt-3">
+                <div class="card-header">
+                  <h5 class="card-title">Direct Chat</h5>
+                </div>
+                <div class="card-body">
+
+                </div>
+                <div class="card-footer">
+                  <form action="#" method="post" name="chatForm">
+                    <div class="input-group">
+                      <input type="text" name="chat" placeholder="Type Message ..." class="form-control">
+                      <button type="submit" class="btn btn-primary">Send</button>
+                    </div>
+                  </form>
+                </div>
+            </div>
+        </div>
+    </main>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/js/bootstrap.bundle.min.js" integrity="sha384-ENjdO4Dr2bkBIFxQpeoTz1HIcje39Wm4jDKdf19U8gI4ddQ3GYNS7NTKfAdVQSZe" crossorigin="anonymous"></script>
+    <script>
+        let socket = new WebSocket('ws://localhost:8080');
+        const userInput = document.getElementById('user');
+        const targetInput = document.getElementById('target');
+
+        socket.onopen = function(e) {
+            console.log('[open] web socket established');
+        }
+
+        socket.onmessage = function(e) {
+            let data = event.data;
+            console.log(`[message] ${data}`);
+        }
+
+        socket.onclose = function(e) {
+            console.log('[closed] web socket closed');
+        }
+
+        document.forms.chatForm.onsubmit = function(e) {
+            e.preventDefault();
+            const user = userInput.value;
+            const target = targetInput.value;
+            const chat = this.chat.value;
+            const data = { user, target, chat }
+            if (!user && !chat) return;
+            this.chat.value = '';
+            socket.send(JSON.stringify(data));
+        }
+
+        document.forms.userForm.onsubmit = function(e) {
+            e.preventDefault();
+            setStorage('user', this.user.value);
+        }
+
+        document.forms.targetForm.onsubmit = function(e) {
+            e.preventDefault();
+            setStorage('target', this.target.value);
+        }
+
+        function setStorage(key, value) {
+            localStorage.setItem(key, value);
+        }
+
+        function setUser() {
+            const user = localStorage.getItem('user');
+            userInput.value = user;
+        }
+
+        function setTarget() {
+            const target = localStorage.getItem('target');
+            targetInput.value = target;
+        }
+
+        setUser();
+        setTarget();
+    </script>
+  </body>
+</html>
