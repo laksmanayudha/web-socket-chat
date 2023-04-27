@@ -175,13 +175,21 @@
         }
 
         async function fetchData(url, option) {
-            const data = await fetch(url, option);
-            const json = await data.json();
-            return json;
+            let data = null;
+            try {
+                const data = await fetch(url, option);
+                const json = await data.json();
+                data = json;
+            } catch (error) {
+                console.log(error)
+            }
+            return data;
         }
 
         async function setUsers() {
-            const { data: { users } } = await fetchData(`${api}/users`);
+            const response = await fetchData(`${api}/users`);
+            if (!response) return;
+            const { data: { users } } = response;
             
             // set from select
             users.forEach(user => {
