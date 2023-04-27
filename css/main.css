@@ -1,0 +1,65 @@
+main {
+    max-width: 960px;
+}
+
+.contact-lists {
+    list-style-type: none;
+    padding: 0;
+    overflow-y: auto;
+    max-height: 300px;
+}
+
+.contact-lists .contact-item {
+    cursor: pointer;
+    overflow: hidden;
+}
+
+.contact-lists .contact-item:hover {
+    background-color: rgb(245, 245, 245);
+}
+
+.user-img-thumb {
+    padding: .7em;
+    border-radius: 50%;
+}
+
+header.navigation {
+    width: 100%;
+    display: flex;
+    align-items: center;
+}
+
+header button {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+#chatContainer {
+    height: unset !important;
+    min-height: 561.5px;
+    /* max-height: 650px !important; */
+}
+
+.sidebar {
+    transition: .4s;
+}
+
+.sidebar--open {
+    transform: translate(0) !important;
+    opacity: 1 !important;
+}
+
+@media only screen and (max-width: 768px) {
+    .sidebar {
+        position: fixed;
+        height: 100%;
+        top: 0;
+        left: 0;
+        bottom: 0;
+        background-color: rgba(65, 65, 65, 0.8);
+        z-index: 999;
+        transform: translate(-1000px);
+        opacity: 0;
+    }
+}
