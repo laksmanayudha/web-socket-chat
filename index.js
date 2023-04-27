@@ -2,26 +2,50 @@ const http = new require('http');
 const ws = new require('ws');
 const wss = new ws.Server({ noServer: true });
 
-const clients = new Set();
+let clients = [];
 
 const database = [];
 
 function onSocketConnect(ws) {
-    clients.add(ws);
-
     ws.on('message', function(message) {
         message = JSON.parse(message.toString());
         database.push(message);
 
-        for (let client of clients) {
-            client.send(JSON.stringify(message));
+        // add user client if not exist
+        let client = clients.find((el) => el.user == message.user);
+        if (!client) {
+            client = {
+                user: message.user,
+                socket: ws
+            }
+            clients = [...clients, client];
         }
 
-        console.log(database);
+        // get target client
+        let clientTarget = clients.find((el) => el.user == message.target);
+        if (!clientTarget) {
+            // send back if target not found
+            const data = {
+                status: 'fail',
+                message: 'User Offline' 
+            }
+            client.socket.send(JSON.stringify(data));
+            return;
+        }
+
+        // send to target
+        const data = {
+            status: 'success',
+            message: 'message sent',
+            data: message
+        }
+        clientTarget.socket.send(JSON.stringify(data));
+        client.socket.send(JSON.stringify(data));
+        return;
     });
 
     ws.on('close', function() {
-        clients.delete(ws);
+        clients = [];
     });
 }
 
@@ -36,7 +60,9 @@ http.createServer((req, res) => {
         return;
     }
 
-    wss.handleUpgrade(req, req.socket, Buffer.alloc(0), onSocketConnect);
+    if (req.url == '/websocket') {
+        wss.handleUpgrade(req, req.socket, Buffer.alloc(0), onSocketConnect);
+    }
 }).listen(8080, () => {
     console.log('Running on http://localhost:8080');
 });
