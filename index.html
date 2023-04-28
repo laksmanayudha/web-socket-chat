@@ -29,7 +29,7 @@
                             </div>
                             <div class="card-body">
                                 <div class="form-group">
-                                    <label for="from">User Name</label>
+                                    <label for="username">User Name</label>
                                     <div class="input-group">
                                         <input type="text" class="form-control" name="username" id="username" placeholder="User name">
                                         <div class="input-group-append">
@@ -42,32 +42,34 @@
                     </form>
                 </div>
                 <div class="mt-2">
-                    <form action="#" id="chatForm" name="chatForm">
-                        <div class="card card-outline card-teal">
-                            <div class="card-header">
-                                <div class="card-title">
-                                    <h5>Chat Now</h5>
-                                </div>
-                            </div>
-                            <div class="card-body">
-                                <div class="form-group">
-                                    <label for="from">From</label>
-                                    <select class="form-control" name="from" id="from">
-                                        <option value="">Select User</option>
-                                    </select>
-                                </div>
-                                <div class="form-group">
-                                    <label for="target">Target</label>
-                                    <input type="hidden" name="target" id="target">
-                                    <ul class="contact-lists px-2" id=" contactLists">
-                                    </ul>
-                                </div>
-                            </div>
-                            <div class="card-footer">
-                                <strong>Created By</strong> YudhaL
+                    <div class="card card-outline card-teal">
+                        <div class="card-header">
+                            <div class="card-title">
+                                <h5>Chat Now</h5>
                             </div>
                         </div>
-                    </form>
+                        <div class="card-body">
+                            <div class="form-group">
+                                <label for="from">From</label>
+                                <select class="form-control" name="from" id="from">
+                                    <option value="">Select User</option>
+                                </select>
+                                <div class="d-flex flex-column flex-sm-row justify-content-between">
+                                    <button class="btn btn-sm bg-teal w-100 mt-2 mr-2" id="connectStatus">Connected</button>
+                                    <button class="btn btn-sm bg-navy w-100 mt-2" id="reconnect">Reconnect</button>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label for="target">Target</label>
+                                <ul class="contact-lists px-2" id=" contactLists">
+                                    <!-- contact item -->
+                                </ul>
+                            </div>
+                        </div>
+                        <div class="card-footer">
+                            <strong>Created By</strong> YudhaL
+                        </div>
+                    </div>
                 </div>
             </aside>
             <div class="col-12 col-md-8">
@@ -75,15 +77,20 @@
                     <div class="col-12">
                         <div class="card card-primary card-outline direct-chat direct-chat-primary mt-2">
                             <div class="card-header">
-                              <span class="card-title">Direct Chat</span>
+                              <span class="card-title" id="directChatTitle">Direct Chat</span>
                             </div>
                             <div class="card-body">
+                                <div class="lds-dual-ring d-none">Loading...</div>
                                 <div class="direct-chat-messages" id="chatContainer">
-                                    
+                                    <div class="d-flex text-muted justify-content-center mt-2">
+                                        <small>No Chat Available</small>
+                                    </div>
                                 </div>
                             </div>
                             <div class="card-footer">
-                              <form action="#" method="post" name="chatForm">
+                              <form action="#" method="POST" name="chatForm" id="chatForm">
+                                <input type="hidden" name="target" id="target">
+                                <input type="hidden" name="user" id="user">
                                 <div class="input-group">
                                   <input type="text" name="chat" placeholder="Type Message ..." class="form-control">
                                   <div class="input-group-append">
@@ -104,6 +111,7 @@
         <div class="direct-chat-msg right">
             <div class="direct-chat-infos clearfix">
               <span class="direct-chat-name float-right" id="name">User Name</span>
+              <span class="direct-chat-timestamp float-left" id="time">23 Jan 5:37 pm</span>
             </div>
             <div class="direct-chat-img bg-primary d-flex justify-content-center align-items-center"><i class="fas fa-user"></i></div>
             <div class="direct-chat-text" id="chat">
@@ -116,6 +124,7 @@
         <div class="direct-chat-msg">
             <div class="direct-chat-infos clearfix">
               <span class="direct-chat-name float-left" id="name">Target Name</span>
+              <span class="direct-chat-timestamp float-right" id="time">23 Jan 5:37 pm</span>
             </div>
             <div class="direct-chat-img bg-danger d-flex justify-content-center align-items-center"><i class="fas fa-user"></i></div>
             <div class="direct-chat-text" id="chat">
@@ -126,7 +135,7 @@
 
     <template id="contactItem">
         <li class="contact-item d-flex align-items-center border p-2 rounded mt-2">
-            <div class="user-img-thumb bg-danger d-flex justify-content-center align-items-center mr-2">
+            <div class="user-img-thumb bg-teal d-flex justify-content-center align-items-center mr-2">
                 <i class="fas fa-user"></i>
             </div>
             <span class="user-thumb-display">User name</span>
@@ -137,110 +146,10 @@
     <!-- script -->
     <script src="./adminlte/jquery.min.js"></script>
     <script src="./adminlte/adminlte.min.js"></script>
-    <script>
-        let socket = new WebSocket('ws://localhost:8080/websocket');
-        const api = 'http://localhost:8080';
-
-        socket.onopen = function(e) {
-            console.log('[open] web socket established');
-        }
-
-        socket.onmessage = function(e) {
-            let response = event.data;
-            const { status, message, data } = JSON.parse(response);
-
-            if (status === 'success') {
-                if (data.user != userInput.value) {
-                    insertMessage({
-                        user: data.user,
-                        chat: data.chat,
-                        type: 'left'
-                    });
-                }
-            }
-
-            // delete message
-        }
-
-        socket.onclose = function(e) {
-            console.log('[closed] web socket closed');
-        }
-
-        function setStorage(key, value) {
-            localStorage.setItem(key, value);
-        }
-
-        function getStorage(key) {
-            return localStorage.getItem(key) || '';
-        }
-
-        async function fetchData(url, option) {
-            let data = null;
-            try {
-                const data = await fetch(url, option);
-                const json = await data.json();
-                data = json;
-            } catch (error) {
-                console.log(error)
-            }
-            return data;
-        }
-
-        async function setUsers() {
-            const response = await fetchData(`${api}/users`);
-            if (!response) return;
-            const { data: { users } } = response;
-            
-            // set from select
-            users.forEach(user => {
-                const option = document.createElement('option');
-                option.value = user.name;
-                option.innerHTML = user.name;
-                $('#from').append(option);
-            });
-
-            // set target
-            const contactItemContent = document.querySelector('#contactItem').content;
-            users.forEach(user => {
-                let content = contactItemContent.cloneNode(true);
-                content.querySelector('.user-thumb-display').innerHTML = user.name;
-                content.querySelector('[name="userThumbName"]').innerHTML = user.name;
-                content.querySelector('[name="userThumbName"]').value = user.name;
-                $('.contact-lists').append(content);
-            });
-        }
-
-        function insertMessage({ user, chat, type }) {
-            const chatContainer = document.getElementById('chatContainer');
-            let template = null;
-
-            if (type == 'left') {
-                template = document.getElementById('leftMessage');
-            } else {
-                template = document.getElementById('rightMessage');
-            }
-            // clone template
-            const content = template.content.cloneNode(true);
-            
-            // fill template
-            content.querySelector('#name').innerHTML = user;
-            content.querySelector('#chat').innerHTML = chat;
-
-            // append chat
-            chatContainer.append(content);
-
-            return content;
-        }
-
-        $('#openSidebar').click(function(e) {
-            $('.sidebar').addClass('sidebar--open');
-        });
-
-        $('#closeSidebar').click(function(e) {
-            $('.sidebar').removeClass('sidebar--open');
-        });
-
-        setUsers();
-    </script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="https://cdn.jsdelivr.net/npm/dayjs@1/dayjs.min.js"></script>
+    <script src="./js/socket.js"></script>
+    <script src="./js/helper.js"></script>
+    <script src="./js/dom.js"></script>
   </body>
 </html>

@@ -15,7 +15,16 @@ main {
 }
 
 .contact-lists .contact-item:hover {
-    background-color: rgb(245, 245, 245);
+    background-color: rgb(220, 220, 220);
+}
+
+.contact-item {
+    transition: .2s;
+}
+
+.contact-item.active {
+    background-color: var(--teal);
+    color: white;
 }
 
 .user-img-thumb {
@@ -37,7 +46,7 @@ header button {
 
 #chatContainer {
     height: unset !important;
-    min-height: 561.5px;
+    min-height: 599px;
     /* max-height: 650px !important; */
 }
 
@@ -49,6 +58,42 @@ header button {
     transform: translate(0) !important;
     opacity: 1 !important;
 }
+
+/* loader */
+.lds-dual-ring {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    /* background-color: rgba(196, 196, 196, 0.1); */
+    width: 100%;
+    position: absolute;
+    top: 0;
+    bottom: 0;
+}
+
+.lds-dual-ring::before {
+    content: " ";
+    display: block;
+    width: 64px;
+    height: 64px;
+    margin: 8px;
+    border-radius: 50%;
+    border: 6px solid black;
+    border-color: black transparent black transparent;
+    animation: lds-dual-ring 1.2s linear infinite;
+}
+
+@keyframes lds-dual-ring {
+    0% {
+        transform: rotate(0deg);
+    }
+
+    100% {
+        transform: rotate(360deg);
+    }
+}
+
 
 @media only screen and (max-width: 768px) {
     .sidebar {
