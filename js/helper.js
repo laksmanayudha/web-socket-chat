@@ -13,7 +13,7 @@ async function fetchData(url, option) {
         const json = await response.json();
         data = json;
     } catch (error) {
-        console.log(error)
+        console.log(error.message)
     }
     return data;
 }
@@ -27,10 +27,9 @@ function getActiveTarget() {
 }
 
 function setActiveUser(user) {
-    $('#from').val(user);
     $('#user').val(user);
 }
 
 function getActiveUser() {
-    return $('#from').val();
+    return $('#user').val();
 }

@@ -1,4 +1,4 @@
-async function displayTargetUsers() {
+async function displayUsers() {
     const response = await fetchData(`${api}/users`);
     if (!response) return;
     const { data: { users } } = response;
@@ -14,6 +14,11 @@ async function displayTargetUsers() {
         const option = document.createElement('option');
         option.value = user.name;
         option.innerHTML = user.name;
+
+        if (getActiveUser() == user.name) {
+            option.setAttribute('selected', true);
+        }
+
         $('#from').append(option);
     });
 
@@ -81,7 +86,7 @@ function setDynamicListeners() {
 }
 
 async function render() {
-    await displayTargetUsers();
+    await displayUsers();
     displayActiveTarget();
     displayActiveChat();
     setDynamicListeners();
@@ -92,12 +97,14 @@ async function displayActiveChat() {
     const user = getActiveUser();
     const target = getActiveTarget();
 
-    $('.lds-dual-ring ').removeClass('d-none'); 
-    const response = await fetchData(`${api}/chats?user=${user}&target=${target}`);
-    const { status, message, data: { chats } } = response;
+    $('.lds-dual-ring ').removeClass('d-none');
+    $('#chatContainer').html('');
+    try {
+        const response = await fetchData(`${api}/chats?user=${user}&target=${target}`);
+        const { status, message, data: { chats } } = response;
+    
+        if (chats.length <= 0) throw new Error("no chats")
 
-    if (chats.length > 0) {
-        $('#chatContainer').html('');
         chats.forEach((chat) => {   
             if (user == chat.user) {
                 insertMessage({
@@ -115,19 +122,21 @@ async function displayActiveChat() {
                 });
             }
         });
-    } else {
+    } catch (error) {
+        console.log(error.message);
         $('#chatContainer').html(`
             <div class="d-flex text-muted justify-content-center mt-2">
                 <small>No Chat Available</small>
             </div>
         `);
     }
-
     $('.lds-dual-ring ').addClass('d-none');
 }
 
 $(document).ready(async function(e) {
-    render();
+    await render();
+    $('#from').val(getStorage('user')).change();
+    setActiveUser(getStorage('user'));
     connectWebSocket();
 
     $('#openSidebar').on('click', function(e) {
@@ -139,8 +148,9 @@ $(document).ready(async function(e) {
     });
 
     $('#from').on('change', function(e) {
-        connectWebSocket();
         setActiveUser(e.target.value);
+        setStorage('user', e.target.value);
+        connectWebSocket();
         displayActiveChat()
     });
 
