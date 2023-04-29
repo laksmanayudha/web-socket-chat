@@ -25,14 +25,14 @@ const chats = [
         id: 1,
         user: users[1].name,
         target: users[0].name,
-        chat: 'Hi',
+        message: 'Hi',
         time: +new Date('2023-03-28 08:10:00')
     },
     {
         id: 2,
         user: users[0].name,
         target: users[1].name,
-        chat: 'How are you?',
+        message: 'How are you?',
         time: +new Date('2023-03-28 09:10:00')
     },
 ];
@@ -116,12 +116,8 @@ function onChat(ws) {
 }
 
 function writeHeaders(res) {
-    const headers = {
-        'Access-Control-Allow-Origin': '*',
-        'Access-Control-Allow-Methods': 'POST, GET',
-    };
-    
-    res.writeHead(200, headers);
+    res.setHeader('Access-Control-Allow-Origin', '*');
+    res.setHeader('Access-Control-Allow-Methods', 'POST, GET');
 }
 
 const server = http.createServer((req, res) => {

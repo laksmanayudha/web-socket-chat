@@ -4,8 +4,8 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Simple Chats</title>
-    <link rel="stylesheet" href="./adminlte/adminlte.min.css">
-    <link rel="stylesheet" href="./adminlte/fontawesome.min.css">
+    <link rel="stylesheet" href="./css/adminlte/adminlte.min.css">
+    <link rel="stylesheet" href="./css/adminlte/fontawesome.min.css">
     <link rel="stylesheet" href="./css/main.css">
   </head>
   <body>
@@ -63,8 +63,10 @@
                             </div>
                             <div class="form-group">
                                 <label for="target">Target</label>
+                                <input type="hidden" name="target" id="target">
                                 <ul class="contact-lists px-2" id=" contactLists">
                                     <!-- contact item -->
+                                    <li class="text-muted">No Users</li>
                                 </ul>
                             </div>
                         </div>
@@ -77,12 +79,12 @@
             <div class="col-12 col-md-8">
                 <div class="row">
                     <div class="col-12">
-                        <div class="card card-primary card-outline direct-chat direct-chat-primary mt-2">
+                        <div class="card card-primary card-outline direct-chat direct-chat-primary mt-2" id="chatDisplay">
                             <div class="card-header">
-                              <span class="card-title" id="directChatTitle">Direct Chat</span>
+                              <span class="card-title" id="chatHeader">Direct Chat</span>
                             </div>
                             <div class="card-body">
-                                <div class="lds-dual-ring d-none">Loading...</div>
+                                <div class="lds-dual-ring d-none" id="chatLoader">Loading...</div>
                                 <div class="direct-chat-messages" id="chatContainer">
                                     <div class="d-flex text-muted justify-content-center mt-2">
                                         <small>No Chat Available</small>
@@ -91,8 +93,6 @@
                             </div>
                             <div class="card-footer">
                               <form action="#" method="POST" name="chatForm" id="chatForm">
-                                <input type="hidden" name="target" id="target">
-                                <input type="hidden" name="user" id="user">
                                 <div class="input-group">
                                   <input type="text" name="chat" placeholder="Type Message ..." class="form-control">
                                   <div class="input-group-append">
@@ -146,12 +146,10 @@
     </template>
 
     <!-- script -->
-    <script src="./adminlte/jquery.min.js"></script>
-    <script src="./adminlte/adminlte.min.js"></script>
+    <script src="./js/adminlte/jquery.min.js"></script>
+    <script src="./js/adminlte/adminlte.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script src="https://cdn.jsdelivr.net/npm/dayjs@1/dayjs.min.js"></script>
-    <script src="./js/socket.js"></script>
-    <script src="./js/helper.js"></script>
-    <script src="./js/dom.js"></script>
+    <script type="module" src="./app.js"></script>
   </body>
 </html>

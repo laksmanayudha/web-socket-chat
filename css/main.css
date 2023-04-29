@@ -65,11 +65,13 @@ header button {
     flex-direction: column;
     justify-content: center;
     align-items: center;
-    /* background-color: rgba(196, 196, 196, 0.1); */
+    background-color: rgba(0, 0, 0, 0.75);
     width: 100%;
     position: absolute;
     top: 0;
     bottom: 0;
+    z-index: 998;
+    color: white;
 }
 
 .lds-dual-ring::before {
@@ -79,8 +81,8 @@ header button {
     height: 64px;
     margin: 8px;
     border-radius: 50%;
-    border: 6px solid black;
-    border-color: black transparent black transparent;
+    border: 6px solid white;
+    border-color: white transparent white transparent;
     animation: lds-dual-ring 1.2s linear infinite;
 }
 
