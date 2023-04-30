@@ -46,6 +46,7 @@ conversation.start(({ connectSocket, chatSocket }) => {
       $('#connectStatus').addClass('bg-teal');
       $('#connectStatus').html('Online');
       $('#reconnect').attr('disabled', true);
+      $('#reconnect').attr('value', 'online');
       console.log(`connect-socket [message]: ${message} for user ${user}.`);
     }
 
@@ -57,6 +58,7 @@ conversation.start(({ connectSocket, chatSocket }) => {
       if (message == 'received') {
         if (client.user === chat.target && getActiveTarget() === chat.user && getActiveTarget() !== client.user) 
           chatDisplay.insertMessage('left', {
+            user: chat.user,
             message: chat.message,
             time: chat.time,
           });
@@ -77,6 +79,7 @@ conversation.start(({ connectSocket, chatSocket }) => {
     $('#connectStatus').addClass('bg-secondary');
     $('#connectStatus').html('Offline');
     $('#reconnect').attr('disabled', false);
+    $('#reconnect').attr('value', 'offline');
     console.log(`connect-socket [close]: connection died, because ${e.reason}`);
     chatSocket.close(1000, e.reason);
   });
@@ -140,6 +143,7 @@ $(document).ready(async function (e) {
 
   $('#reconnect').on('click', function(e) {
     client.reconnect();
+    getChats();
   });
 
   $('#addUserForm').on('submit', async function (e) {
@@ -227,3 +231,7 @@ $(document).ready(async function (e) {
     $('.toast').toast('show')
 
 });
+
+// send chat when offline
+// modal when disconnected
+// target last chat
