@@ -20,26 +20,88 @@ let users = [];
 const api = 'localhost:8080';
 const RENDER_EVENT = 'RENDER_EVENT';
 const chatDisplay = new ChatDisplay('#chatDisplay');
+const conversation = new Conversation({ connectUrl: `${api}/ws-connect`, chatUrl: `${api}/ws-chat` });
+const client = conversation.Client;
+
+// start conversation
+conversation.start(({ connectSocket, chatSocket }) => {
+
+  // connect socket
+  connectSocket.addEventListener('open', function(e) {
+    client // for reconnect
+      .setId(getStorage('id'))
+      .from(getActiveUser());
+    console.log(`connect-socket [open]: web socket connection established.`);
+  });
+
+  connectSocket.addEventListener('message', function(e) {
+    const response = JSON.parse(e.data);
+    const { status, type,  message, data } = response
+
+    if (type == 'connect') {
+      const { user, id } = data;
+      setStorage('id', id);
+      client.setId(id);
+      $('#connectStatus').removeClass('bg-secondary');
+      $('#connectStatus').addClass('bg-teal');
+      $('#connectStatus').html('Online');
+      $('#reconnect').attr('disabled', true);
+      console.log(`connect-socket [message]: ${message} for user ${user}.`);
+    }
+
+    if (type == 'message') {
+      const { chat } = data;
+
+      if (message == 'offline') console.log(`connect-socket [message]: User ${chat.target} offline.`);
+      if (message == 'sent') console.log(`connect-socket [message]: Message sent to ${chat.target}`);
+      if (message == 'received') {
+        if (client.user === chat.target && getActiveTarget() === chat.user && getActiveTarget() !== client.user) 
+          chatDisplay.insertMessage('left', {
+            message: chat.message,
+            time: chat.time,
+          });
+        
+        if (client.user === chat.target && getActiveTarget() !== chat.user && getActiveTarget !== client.user) 
+          chatDisplay.notify({
+            user: chat.user,
+            message: chat.message,
+            time: chat.time,
+          });
+        console.log(`connect-socket [message]: Message received from ${chat.user}`);
+      }
+    }
+  });
+
+  connectSocket.addEventListener('close', function(e) {
+    $('#connectStatus').removeClass('bg-teal');
+    $('#connectStatus').addClass('bg-secondary');
+    $('#connectStatus').html('Offline');
+    $('#reconnect').attr('disabled', false);
+    console.log(`connect-socket [close]: connection died, because ${e.reason}`);
+    chatSocket.close(1000, e.reason);
+  });
+
+  // chat socket
+  chatSocket.addEventListener('close', function(e) {
+    console.log(`chat-socket [close]: connection died, because ${e.reason}`);
+  });
+});
 
 function getChats() {
   chatDisplay
-  .changeHeader(getActiveTarget())
-  .setUserAndTarget(getActiveUser(), getActiveTarget())
-  .showLoading()
-  .getMessages(`http://${api}/chats`, { 
-    user: getActiveUser(), 
-    target: getActiveTarget()
-  })
-  .then((messages) => {
-    messages = messages.map((message) => ({
-      ...message, 
-      time: dayjs(message.time).format('DD MMM YYYY HH:mm:ss')
-    }));
-    
-    chatDisplay
-      .hideLoading()
-      .display(messages)
-  });
+    .changeHeaderLeft(`To: ${getActiveTarget()}`)
+    .changeHeaderRight(`I'm <strong>${getActiveUser()}</strong>`)
+    .setUserAndTarget(getActiveUser(), getActiveTarget())
+    .showLoading()
+    .getMessages(`http://${api}/chats`, { 
+      user: getActiveUser(), 
+      target: getActiveTarget()
+    })
+    .then((messages) => {
+      chatDisplay
+        .hideLoading()
+        .display(messages)
+    });
 }
 
 $(document).ready(async function (e) {
@@ -72,7 +134,12 @@ $(document).ready(async function (e) {
 
   $('#from').on('change', function (e) {
     setStorage('user', e.target.value);
+    client.from(e.target.value);
     getChats();
+  });
+
+  $('#reconnect').on('click', function(e) {
+    client.reconnect();
   });
 
   $('#addUserForm').on('submit', async function (e) {
@@ -117,6 +184,24 @@ $(document).ready(async function (e) {
 
   $('#chatForm').on('submit', function (e) {
     e.preventDefault();
+    const message = $(this).serializeArray()[0].value;
+    const time = +new Date();
+    if (!message) return;
+
+    // insert message
+    chatDisplay.insertMessage('right', { message, time });
+
+    // clear chat form
+    $(this).find('input').val('');
+
+    // sent to target
+    try {
+      client
+        .to(getActiveTarget())
+        .send(message, time);
+    } catch(error) {
+      console.log(error.message);
+    }
   });
 
   // get users
@@ -133,4 +218,12 @@ $(document).ready(async function (e) {
 
   // get chats
   getChats();
+
+  // set client
+  client
+    .setId(getStorage('id'))
+    .from(getActiveUser());
+  
+    $('.toast').toast('show')
+
 });

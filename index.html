@@ -4,13 +4,14 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Simple Chats</title>
+    <link rel="stylesheet" href="./css/adminlte/toastr.min.css">
     <link rel="stylesheet" href="./css/adminlte/adminlte.min.css">
     <link rel="stylesheet" href="./css/adminlte/fontawesome.min.css">
     <link rel="stylesheet" href="./css/main.css">
   </head>
   <body>
     <main class="container-fluid  p-2 d-flex flex-column justify-content-center align-items-center">
-        <header class="navigation my-3">
+        <header class="navigation border-bottom my-3">
             <button class="btn btn-primary mr-3 d-md-none" id="openSidebar">=</button>
             <h3>Simple Chats</h3>
         </header>
@@ -53,13 +54,16 @@
                                 <label for="from">From</label>
                                 <div class="input-group">
                                     <div class="input-group-prepend">
-                                        <button class="btn bg-navy" id="connectStatus">Disconnected</button>
+                                        <button class="btn bg-secondary" id="connectStatus">Offline</button>
                                     </div>
                                     <select class="form-control" name="from" id="from" autofocus>
                                         <option value="">Select User</option>
                                     </select>
                                 </div>
                                 <small class="text-muted">Select user first, to start conversation.</small>
+                            </div>
+                            <div class="d-flex my-2">
+                                <button class="btn bg-navy w-100" id="reconnect">Reconnect</button>
                             </div>
                             <div class="form-group">
                                 <label for="target">Target</label>
@@ -81,7 +85,10 @@
                     <div class="col-12">
                         <div class="card card-primary card-outline direct-chat direct-chat-primary mt-2" id="chatDisplay">
                             <div class="card-header">
-                              <span class="card-title" id="chatHeader">Direct Chat</span>
+                              <div class="d-flex justify-content-between">
+                                <span class="card-title" id="chatHeaderLeft">Direct Chat</span>
+                                <span class="card-title" id="chatHeaderRight">I'm User</span>
+                              </div>
                             </div>
                             <div class="card-body">
                                 <div class="lds-dual-ring d-none" id="chatLoader">Loading...</div>
@@ -147,6 +154,8 @@
 
     <!-- script -->
     <script src="./js/adminlte/jquery.min.js"></script>
+    <script src="./js/adminlte/bootstrap.bundle.min.js"></script>
+    <script src="./js/adminlte/toastr.min.js"></script>
     <script src="./js/adminlte/adminlte.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script src="https://cdn.jsdelivr.net/npm/dayjs@1/dayjs.min.js"></script>

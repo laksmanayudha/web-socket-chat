@@ -3,7 +3,8 @@ import { fetchData } from "../helper.js";
 class ChatDisplay {
   constructor(element, user = null, target = null) {
     this.element = $(element);
-    this.header = $(this.element.find('#chatHeader'));
+    this.headerLeft = $(this.element.find('#chatHeaderLeft'));
+    this.headerRight = $(this.element.find('#chatHeaderRight'));
     this.loader = $(this.element.find('#chatLoader'));
     this.container = $(this.element.find('#chatContainer'));
     this.messages = [];
@@ -11,8 +12,10 @@ class ChatDisplay {
     this.target = target;
 
     // method binding
-    this.changeHeader = this.changeHeader.bind(this);
+    this.changeHeaderLeft = this.changeHeaderLeft.bind(this);
+    this.changeHeaderRight = this.changeHeaderRight.bind(this);
     this.insertMessage = this.insertMessage.bind(this);
+    this.notify = this.notify.bind(this);
     this.noMessage = this.noMessage.bind(this);
     this.showLoading = this.showLoading.bind(this);
     this.hideLoading = this.hideLoading.bind(this);
@@ -22,12 +25,22 @@ class ChatDisplay {
     this.display = this.display.bind(this);
   }
 
-  changeHeader(data) {
-    this.header.html(data);
+  changeHeaderLeft(data) {
+    this.headerLeft.html(data || 'Direct Chat');
     return this;
   }
 
-  insertMessage(type = 'right', { user, target, message, time }) {
+  changeHeaderRight(data) {
+    this.headerRight.html(data || 'I am User');
+    return this;
+  }
+
+  insertMessage(type = 'right', {
+    user = this.user, 
+    target = this.target, 
+    message = '', 
+    time = +new Date() 
+  }) {
     let template = null;
 
     if (type == 'left') {
@@ -41,11 +54,31 @@ class ChatDisplay {
     // fill template
     content.querySelector('#name').innerHTML = user;
     content.querySelector('#chat').innerHTML = message;
-    content.querySelector('#time').innerHTML = time;
+    content.querySelector('#time').innerHTML = dayjs(time).format('DD MMM YYYY HH:mm');
 
     // append chat
     this.container.append(content);
 
+    // scroll to bottom
+    this.container.scrollTop(this.container.prop('scrollHeight'));
+
+    return this;
+  }
+
+  notify({ 
+    user = this.user, 
+    target = this.target, 
+    message = '', 
+    time = +new Date() 
+  }) {
+    $(document).Toasts('create', {
+      title: user,
+      autohide: true,
+      delay: 3000,
+      body: message,
+      icon: 'fas fa-user',
+      class: 'bg-maroon'
+    });
     return this;
   }
 
@@ -103,9 +136,9 @@ class ChatDisplay {
     this.container.html('');
     messages.forEach(message => {
       if (message.user === this.user) {
-        this.insertMessage('left', message);
-      } else {
         this.insertMessage('right', message);
+      } else {
+        this.insertMessage('left', message);
       }
     });
     

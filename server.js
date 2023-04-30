@@ -37,55 +37,119 @@ const chats = [
     },
 ];
 
+function makeid(length) {
+    let result = '';
+    const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+    const charactersLength = characters.length;
+    let counter = 0;
+    while (counter < length) {
+        result += characters.charAt(Math.floor(Math.random() * charactersLength));
+        counter += 1;
+    }
+    return result;
+}
+
+function debug(state) {
+    console.log('\n')
+    console.log(`[${state}]`);
+    console.log(clients.map(({ user, id }) => ({ user, id })));
+    console.log('=========================================')
+    console.log('\n')
+}
+
 function onSocketConnect(ws) {
 
-    ws.on('message', function(message) {
-        message = JSON.parse(message.toString())
+    ws.on('message', function (message) {
+        message = JSON.parse(message.toString());
 
-        // add user client if not exist
-        let client = clients.find((el) => el.user == message.user);
-        if (!client) {
-            client = {
-                user: message.user,
-                socket: ws
+        // close all other connection related to user
+        let newClients = [];
+        for (let client of clients) {
+            if (client.user === message.user && client.id !== message.id) {
+                client.socket.close(1000, 'another connection are made.');
+                continue;
             }
-            clients = [...clients, client];
+
+            newClients.push(client);
         }
+
+        // set new clients
+        clients = newClients;
+
+        // check if client change user
+        const client = clients.find((el) => el.id === message.id);
+        if (!client) {
+            // prepare data
+            const id = makeid(10);
+
+            // add user
+            clients = [...clients, {
+                user: message.user,
+                socket: ws,
+                id
+            }];
+
+            // send response
+            const data = {
+                status: 'success',
+                type: 'connect',
+                message: 'connection added',
+                data: {
+                    user: message.user,
+                    id
+                }
+            };
+
+            ws.send(JSON.stringify(data));
+            debug('connect-message');
+            return;
+        }
+
+        client.user = message.user;
+        client.socket = ws;
 
         // send response
         const data = {
             status: 'success',
-            message: 'connect success',
+            type: 'connect',
+            message: 'change user',
             data: {
-                user: message.user
+                user: client.user,
+                id: client.id
             }
         }
 
-        ws.send(JSON.stringify(data));
+        client.socket.send(JSON.stringify(data));
+        debug('connect-message');
         return;
     });
 
-    ws.on('close', function() {
-        clients.filter((client) => client.socket !== ws);
+    ws.on('close', function (message) {
+        clients = clients.filter((client) => client.socket !== ws);
+        debug('connect-closed');
     });
 }
 
 function onChat(ws) {
 
-    ws.on('message', function(message) {
+    ws.on('message', function (message) {
         message = JSON.parse(message.toString());
-        message = {...message, time: +new Date()};
-        chats.push(message);
 
-        // add user client if not exist
-        let client = clients.find((el) => el.user == message.user);
+        // check client still connected
+        let client = clients.find((el) => el.id === message.id);
         if (!client) {
-            client = {
-                user: message.user,
-                socket: ws
-            }
-            clients = [...clients, client];
+            ws.close(1000, 'You are disconnected');
+            return;
+        };
+
+        const newChat = {
+            user: message.user,
+            target: message.target,
+            time: message.time,
+            message: message.message
         }
+
+        chats.push(newChat);
 
         // get target client
         let clientTarget = clients.find((el) => el.user == message.target);
@@ -93,7 +157,11 @@ function onChat(ws) {
             // send back if target not found
             const data = {
                 status: 'fail',
-                message: 'User Offline' 
+                type: 'message',
+                message: 'offline',
+                data: {
+                    chat: newChat
+                }
             }
             client.socket.send(JSON.stringify(data));
             return;
@@ -102,16 +170,21 @@ function onChat(ws) {
         // send to target
         const data = {
             status: 'success',
-            message: 'message sent',
-            data: message
+            type: 'message',
+            message: '',
+            data: {
+                chat: newChat
+            }
         }
-        clientTarget.socket.send(JSON.stringify(data));
-        client.socket.send(JSON.stringify(data));
+
+        clientTarget.socket.send(JSON.stringify({...data, message: 'received'}));
+        client.socket.send(JSON.stringify({...data, message: 'sent'}));
         return;
     });
 
-    ws.on('close', function() {
-        clients = [];
+    ws.on('close', function () {
+        clients = clients.filter((client) => client.socket !== ws);
+        debug('chat-closed');
     });
 }
 
@@ -123,10 +196,10 @@ function writeHeaders(res) {
 const server = http.createServer((req, res) => {
     writeHeaders(res);
     let data = {};
-    const path = url.parse(req.url).pathname;
+    const { pathname } = url.parse(req.url);
 
     if (req.method == 'POST') {
-        switch(path) {
+        switch (pathname) {
             case '/users':
                 let body = "";
                 req.on('data', (chunk) => body += chunk);
@@ -146,7 +219,7 @@ const server = http.createServer((req, res) => {
                             id: +new Date()
                         }
                         users.push(user);
-    
+
                         // response
                         data = {
                             status: 'success',
@@ -170,7 +243,7 @@ const server = http.createServer((req, res) => {
     }
 
     if (req.method == 'GET') {
-        switch(path) {
+        switch (pathname) {
             case '/ws-connect':
                 if (!req.headers.upgrade || req.headers.upgrade.toLowerCase() != 'websocket') {
                     data = {
@@ -181,7 +254,7 @@ const server = http.createServer((req, res) => {
                     res.end(JSON.stringify(data));
                     return;
                 }
-            
+
                 if (!req.headers.connection.match(/\bupgrade\b/i)) {
                     data = {
                         status: 'fail',
@@ -191,7 +264,7 @@ const server = http.createServer((req, res) => {
                     res.end(JSON.stringify(data));
                     return;
                 }
-        
+
                 wss.handleUpgrade(req, req.socket, Buffer.alloc(0), onSocketConnect);
                 break;
 
@@ -205,7 +278,7 @@ const server = http.createServer((req, res) => {
                     res.end(JSON.stringify(data));
                     return;
                 }
-            
+
                 if (!req.headers.connection.match(/\bupgrade\b/i)) {
                     data = {
                         status: 'fail',
@@ -215,7 +288,7 @@ const server = http.createServer((req, res) => {
                     res.end(JSON.stringify(data));
                     return;
                 }
-        
+
                 wss.handleUpgrade(req, req.socket, Buffer.alloc(0), onChat);
                 break;
 
@@ -236,11 +309,11 @@ const server = http.createServer((req, res) => {
                     const user = queryParams.get('user');
                     const target = queryParams.get('target');
 
-                    const chatData = chats.filter((chat) => 
+                    const chatData = chats.filter((chat) =>
                         (chat.user === user && chat.target === target) ||
                         (chat.user === target && chat.target === user)
                     );
-                    
+
                     data = {
                         status: 'success',
                         message: 'Success Get Chats',
