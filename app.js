@@ -26,6 +26,8 @@ const client = conversation.Client;
 // start conversation
 conversation.start(({ connectSocket, chatSocket }) => {
 
+  chatDisplay.showConnecting();
+
   // connect socket
   connectSocket.addEventListener('open', function(e) {
 
@@ -46,7 +48,7 @@ conversation.start(({ connectSocket, chatSocket }) => {
 
     if (type == 'connect') {
       const { user, id } = data;
-      
+
       setStorage('id', id); // save connection id
       client.setId(id);
       client.isOffline = false;
@@ -147,9 +149,7 @@ $(document).ready(async function (e) {
     setStorage('user', e.target.value);
 
     if (client.isOffline) {
-      client
-        .from(e.target.value)
-        .reconnect();
+      $('#reconnect').click();
       return;
     }
 
@@ -159,7 +159,10 @@ $(document).ready(async function (e) {
   });
 
   $('#reconnect').on('click', function(e) {
-    client.reconnect();
+    client
+      .from(getActiveUser())
+      .to(getActiveTarget())
+      .reconnect();
   });
 
   $('#addUserForm').on('submit', async function (e) {
@@ -206,7 +209,7 @@ $(document).ready(async function (e) {
     e.preventDefault();
     const message = $(this).serializeArray()[0].value;
     const time = +new Date();
-    if (!message) return;
+    if (!message || !client.user || !client.target) return;
 
     // insert message
     chatDisplay.insertMessage('right', { message, time });
@@ -244,5 +247,4 @@ $(document).ready(async function (e) {
     .connect();
 });
 
-// protect send chat when offline (retry send), pop up send chat when offline 
 // target last chat

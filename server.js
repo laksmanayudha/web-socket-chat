@@ -57,6 +57,12 @@ function debug(state) {
     console.log('\n')
 }
 
+function withThrottling(callback, delay = 1500) {
+    setTimeout(() => {
+        callback()
+    }, delay);
+}
+
 function onSocketConnect(ws) {
 
     ws.on('message', function (message) {
@@ -265,7 +271,9 @@ const server = http.createServer((req, res) => {
                     return;
                 }
 
-                wss.handleUpgrade(req, req.socket, Buffer.alloc(0), onSocketConnect);
+                withThrottling(() => {
+                    wss.handleUpgrade(req, req.socket, Buffer.alloc(0), onSocketConnect);
+                });
                 break;
 
             case '/ws-chat':

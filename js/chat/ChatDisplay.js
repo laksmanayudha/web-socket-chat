@@ -10,6 +10,7 @@ class ChatDisplay {
     this.reconnectButton = $('#reconnect');
     this.connectStatusButton = $('#connectStatus');
     this.disconnectDisplay = $('#chatDisconnect');
+    this.connectingDisplay = $('#chatConnecting');
     this.form = $('#chatForm');
     this.input = $('#chatForm input');
     this.submitButton = $('#chatForm button');
@@ -20,6 +21,7 @@ class ChatDisplay {
     // method binding
     this.changeHeaderLeft = this.changeHeaderLeft.bind(this);
     this.changeHeaderRight = this.changeHeaderRight.bind(this);
+    this.showConnecting = this.showConnecting.bind(this);
     this.showOffline = this.showOffline.bind(this);
     this.showOnline = this.showOnline.bind(this);
     this.insertMessage = this.insertMessage.bind(this);
@@ -43,7 +45,18 @@ class ChatDisplay {
     return this;
   }
 
+  showConnecting() {
+    this.disconnectDisplay.addClass('d-none');
+    this.connectingDisplay.removeClass('d-none');
+    this.input.attr('disabled', true);
+    this.submitButton.attr('disabled', true);
+    this.reconnectButton.find('span').addClass('connecting');
+  }
+
   showOffline() {
+    this.connectingDisplay.addClass('d-none');
+    this.reconnectButton.find('span').removeClass('connecting');
+
     this.connectStatusButton.removeClass('bg-teal');
     this.connectStatusButton.addClass('bg-secondary');
     this.connectStatusButton.html('Offline');
@@ -56,7 +69,7 @@ class ChatDisplay {
     // alert  offline
     Swal.fire({
       title: "You're Offline.",
-      text: 'Another connection has been made.',
+      text: 'Connection lost or another connection has been made.',
       confirmButtonText: 'Reconnect',
       cancelButtonText: 'OK',
       showCancelButton: true,
@@ -74,6 +87,9 @@ class ChatDisplay {
   }
 
   showOnline() {
+    this.connectingDisplay.addClass('d-none');
+    this.reconnectButton.find('span').removeClass('connecting')
+
     this.connectStatusButton.removeClass('bg-secondary');
     this.connectStatusButton.addClass('bg-teal');
     this.connectStatusButton.html('Online');

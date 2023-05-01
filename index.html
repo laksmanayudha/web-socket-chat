@@ -65,7 +65,9 @@
                                 <small class="text-muted">Select user first, to start conversation.</small>
                             </div>
                             <div class="d-flex my-2">
-                                <button class="btn bg-navy w-100" id="reconnect" value="offline">Reconnect</button>
+                                <button class="btn bg-navy w-100" id="reconnect" value="offline">
+                                    <span>Reconnect</span>
+                                </button>
                             </div>
                             <div class="form-group">
                                 <label for="target">Target</label>
@@ -94,8 +96,10 @@
                             </div>
                             <div class="card-body">
                                 <div class="lds-dual-ring d-none" id="chatLoader">Loading...</div>
-                                <div class="chat-container-disonnect d-none" id="chatDisconnect">
-                                    <i class="text-danger fas fa-comment-slash fa-3x"></i>
+                                <div class="chat-container-disonnect d-none" id="chatDisconnect"><i class="text-danger fas fa-comment-slash fa-3x"></i></div>
+                                <div class="chat-container-connecting d-none" id="chatConnecting">
+                                    <i class="text-teal fas fa-wifi fa-3x connecting"></i>
+                                    <span class="text-teal">Select User First. Connecting...</span>
                                 </div>
                                 <div class="direct-chat-messages" id="chatContainer">
                                     <div class="d-flex text-muted justify-content-center mt-2">

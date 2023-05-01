@@ -60,9 +60,14 @@ header button {
     opacity: 1 !important;
 }
 
+.connecting {
+    animation: connecting .5s linear infinite alternate;
+}
+
 /* loader */
 .lds-dual-ring,
-.chat-container-disonnect {
+.chat-container-disonnect,
+.chat-container-connecting {
     display: flex;
     flex-direction: column;
     justify-content: center;
@@ -91,6 +96,16 @@ header button {
 /* toast */
 .toast {
     width: 300px !important;
+}
+
+@keyframes connecting {
+    0% {
+        opacity: 1;
+    }
+
+    100% {
+        opacity: 0;
+    }
 }
 
 @keyframes lds-dual-ring {
