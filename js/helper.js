@@ -37,7 +37,25 @@ function displayDefaultActiveTarget(activeTarget) {
     });
 }
 
-function loadUsers(users) {
+
+function loadUsers(users = [], lastChats = {}) {
+
+    function lastChatFor(target) {
+        let lastChat = lastChats.to[target];
+
+        if (lastChat.length > 0) {
+            let { message, time, user } = lastChat[lastChat.length - 1];
+            message = user === lastChats.from
+                        ? `<i class="fas fa-check"></i> ${message}`
+                        : message;
+            return { message, time };
+        }
+        
+        return {
+            message: 'No message',
+            time: null,
+        };
+    }
 
     // set user select
     $('#from').html('');
@@ -57,9 +75,11 @@ function loadUsers(users) {
     $('.contact-lists').html('');
     const contactItemContent = document.querySelector('#contactItem').content;
     users.forEach(user => {
-        let content = contactItemContent.cloneNode(true);
-        content.querySelector('.user-thumb-display').innerHTML = user.name;
-        content.querySelector('[name="userThumbName"]').innerHTML = user.name;
+        const content = contactItemContent.cloneNode(true);
+        const { message, time } = lastChatFor(user.name);
+        content.querySelector('.user-thumb-name').innerHTML = user.name;
+        content.querySelector('.user-thumb-message').innerHTML = message;
+        content.querySelector('.user-thumb-message_time').innerHTML = time ? dayjs(time).format('DD/MM/YYYY HH:mm') : '';
         content.querySelector('[name="userThumbName"]').value = user.name;
         $('.contact-lists').append(content);
     });

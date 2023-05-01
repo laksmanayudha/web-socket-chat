@@ -27,9 +27,17 @@ main {
     color: white;
 }
 
-.user-img-thumb {
-    padding: .7em;
+.user-thumb-img {
+    padding: .7em .8em;
     border-radius: 50%;
+}
+
+.user-thumb-message {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    display: -webkit-box;
+    -webkit-line-clamp: 1;
+    -webkit-box-orient: vertical;
 }
 
 header.navigation {

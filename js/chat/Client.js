@@ -54,7 +54,10 @@ class Client {
     const { connectSocket } = this.conversation;
 
     try {
-      connectSocket.send(JSON.stringify({ user: this.user, id: this.id }));
+      if (connectSocket.readyState === 1) // send when web socket ready
+        connectSocket.send(JSON.stringify({ user: this.user, id: this.id }));
+      else
+        console.log('Web socket not ready');
     } catch (error) {
       console.log(error.message);
     }

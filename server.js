@@ -26,14 +26,16 @@ const chats = [
         user: users[1].name,
         target: users[0].name,
         message: 'Hi',
-        time: +new Date('2023-03-28 08:10:00')
+        time: +new Date('2023-03-28 08:10:00'),
+        isRead: true,
     },
     {
         id: 2,
         user: users[0].name,
         target: users[1].name,
         message: 'How are you?',
-        time: +new Date('2023-03-28 09:10:00')
+        time: +new Date('2023-03-28 09:10:00'),
+        isRead: false,
     },
 ];
 
@@ -149,10 +151,12 @@ function onChat(ws) {
         };
 
         const newChat = {
+            id: makeid(5),
             user: message.user,
             target: message.target,
             time: message.time,
-            message: message.message
+            message: message.message,
+            isRead: false,
         }
 
         chats.push(newChat);
@@ -205,9 +209,9 @@ const server = http.createServer((req, res) => {
     const { pathname } = url.parse(req.url);
 
     if (req.method == 'POST') {
+        let body = "";
         switch (pathname) {
             case '/users':
-                let body = "";
                 req.on('data', (chunk) => body += chunk);
                 req.on('end', () => {
                     try {
@@ -243,12 +247,42 @@ const server = http.createServer((req, res) => {
                     res.end(JSON.stringify(data));
                 });
                 break;
+
+            case '/chat-read':
+                req.on('data', (chunk) => body += chunk);
+                req.on('end', () => {
+                    try {
+                        body = JSON.parse(body);
+                        const { chatIds } = body;
+                        chatIds.forEach(id => {
+                            let chat = chats.find((chat) => chat.id === id);
+                            if (chat) chat.isRead = true;
+                        });
+
+                        // response
+                        data = {
+                            status: 'success',
+                            message: 'Chat Read',
+                            data: { chatIds }
+                        };
+                    } catch (error) {
+                        // response
+                        data = {
+                            status: 'fail',
+                            message: error.message,
+                            data: null
+                        };
+                    }
+                    res.end(JSON.stringify(data));
+                })
+                break;
             default:
                 break;
         }
     }
 
     if (req.method == 'GET') {
+        let body = "";
         switch (pathname) {
             case '/ws-connect':
                 if (!req.headers.upgrade || req.headers.upgrade.toLowerCase() != 'websocket') {
@@ -310,7 +344,6 @@ const server = http.createServer((req, res) => {
                 break;
 
             case '/chats':
-                let body = "";
                 req.on('data', (chunk) => body += chunk);
                 req.on('end', () => {
                     const queryParams = new URLSearchParams(url.parse(req.url).query);
@@ -330,12 +363,44 @@ const server = http.createServer((req, res) => {
                         },
                     };
 
-                    setTimeout(() => {
+                    withThrottling(() => {
                         res.end(JSON.stringify(data));
                     }, 300);
                 });
                 break;
 
+            case '/last-chats':
+                req.on('data', (chunk) => body += chunk);
+                req.on('end', () => {
+                    const queryParams = new URLSearchParams(url.parse(req.url).query);
+                    const forUser = queryParams.get('forUser');
+
+                    const lastChats = users.map((user) => {
+                        const lasts = chats.filter((chat) =>
+                                        (chat.user === forUser && chat.target === user.name) ||
+                                        (chat.user === user.name && chat.target === forUser)
+                                    );
+                        const last = lasts.length > 0
+                                    ? [lasts[lasts.length - 1]]
+                                    : []
+                        return {
+                            ...user,
+                            chats: last
+                        }
+                    });
+
+                    data = {
+                        status: 'success',
+                        message: 'Success Get Last Chats',
+                        data: {
+                            lastChats
+                        },
+                    };
+
+                    res.end(JSON.stringify(data));
+                });
+                break;
+                break;
             default:
                 data = {
                     status: 'fail',

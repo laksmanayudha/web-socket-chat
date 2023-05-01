@@ -11,12 +11,12 @@ import {
 } from './js/helper.js';
 
 import {
-  Client,
   Conversation,
   ChatDisplay
 } from './js/chat/index.js'
 
-let users = [];
+let USERS = [];
+let LASTCHATS = {};
 const api = 'localhost:8080';
 const RENDER_EVENT = 'RENDER_EVENT';
 const chatDisplay = new ChatDisplay('#chatDisplay');
@@ -28,7 +28,7 @@ conversation.start(({ connectSocket, chatSocket }) => {
 
   chatDisplay.showConnecting();
 
-  // connect socket
+  // socket on open
   connectSocket.addEventListener('open', function(e) {
 
     if (client.isOffline) { // for reconnect
@@ -42,46 +42,70 @@ conversation.start(({ connectSocket, chatSocket }) => {
     console.log(`connect-socket [open]: web socket connection established.`);
   });
 
-  connectSocket.addEventListener('message', function(e) {
+  // socket on message
+  connectSocket.addEventListener('message', async function(e) {
     const response = JSON.parse(e.data);
     const { status, type,  message, data } = response
 
-    if (type == 'connect') {
+    if (type == 'connect') { // on user connect
       const { user, id } = data;
-
       setStorage('id', id); // save connection id
+
       client.setId(id);
       client.isOffline = false;
       chatDisplay.showOnline();
-      getChats();
+
+      getChats(); // set current active chat
+      await getLastChatsFor(client.user); // set last chat thumb for active user
+      document.dispatchEvent(new Event(RENDER_EVENT));
 
       console.log(`connect-socket [message]: ${message} for user ${user}.`);
     }
 
-    if (type == 'message') {
+    if (type == 'message') { // on message sent or received
       const { chat } = data;
 
-      if (message == 'offline') console.log(`connect-socket [message]: User ${chat.target} offline.`);
-      if (message == 'sent') console.log(`connect-socket [message]: Message sent to ${chat.target}`);
+      if (message == 'offline')
+        console.log(`connect-socket [message]: User ${chat.target} offline.`);
+      
+      if (message == 'sent') {
+        insertLastChat(chat.target, chat); // push last chat to related target
+        console.log(`connect-socket [message]: Message sent to ${chat.target}`);
+      }
+
       if (message == 'received') {
-        if (client.user === chat.target && getActiveTarget() === chat.user && getActiveTarget() !== client.user) 
+        if ( // target currently active, insert to chat container
+            client.user === chat.target && 
+            getActiveTarget() === chat.user && 
+            getActiveTarget() !== client.user
+        ){
           chatDisplay.insertMessage('left', {
             user: chat.user,
             message: chat.message,
             time: chat.time,
           });
+        }
         
-        if (client.user === chat.target && getActiveTarget() !== chat.user && getActiveTarget !== client.user) 
+        if ( // target not active, notify the user
+            client.user === chat.target && 
+            getActiveTarget() !== chat.user && 
+            getActiveTarget !== client.user
+        ){
           chatDisplay.notify({
             user: chat.user,
             message: chat.message,
             time: chat.time,
           });
+        }
+        
+        insertLastChat(chat.user, chat); // push last chat to related user
         console.log(`connect-socket [message]: Message received from ${chat.user}`);
       }
+      document.dispatchEvent(new Event(RENDER_EVENT));
     }
   });
 
+  // socket on close
   connectSocket.addEventListener('close', function(e) {
     client.isOffline = true;
     chatDisplay.showOffline();
@@ -89,11 +113,16 @@ conversation.start(({ connectSocket, chatSocket }) => {
     chatSocket.close(1000, e.reason);
   });
 
-  // chat socket
+  // socket on close
   chatSocket.addEventListener('close', function(e) {
     console.log(`chat-socket [close]: connection died, because ${e.reason}`);
   });
 });
+
+function insertLastChat(target, chat) {
+  if (LASTCHATS.to[target].find(({ id }) => id === chat.id)) return;
+  LASTCHATS.to[target].push(chat);
+}
 
 function getChats() {
   chatDisplay
@@ -115,11 +144,32 @@ function getChats() {
     });
 }
 
+async function getUsers() {
+  try {
+    const response = await fetchData(`http://${api}/users`);
+    const { data } = response;
+    USERS = data.users;
+  } catch (error) {
+    console.log(error.message)
+  }
+}
+
+async function getLastChatsFor(user) {
+  try {
+    const { data } = await fetchData(`http://${api}/last-chats?forUser=${user}`);
+    const toUser = {};
+    data.lastChats.forEach(lastChat => { toUser[lastChat.name] = lastChat.chats });
+    LASTCHATS = { from: user, to: toUser };
+  } catch (error) {
+    console.log(error.message);
+  }
+}
+
 $(document).ready(async function (e) {
 
   // event listeners
   document.addEventListener(RENDER_EVENT, function () {
-    loadUsers(users);
+    loadUsers(USERS, LASTCHATS);
     setActiveUser(getStorage('user'));
     setActiveTarget(getStorage('target'));
     displayDefaultActiveTarget(getStorage('target'));
@@ -227,14 +277,10 @@ $(document).ready(async function (e) {
     }
   });
 
-  // get users
-  try {
-    const response = await fetchData(`http://${api}/users`);
-    const { data } = response;
-    users = data.users;
-  } catch (error) {
-    console.log(error.message)
-  }
+  // initial data
+  await getUsers(); // get users
+  await getLastChatsFor(getStorage('user'));  // last chats thumb for active user
+
 
   // render to display users on UI
   document.dispatchEvent(new Event(RENDER_EVENT));
@@ -247,4 +293,4 @@ $(document).ready(async function (e) {
     .connect();
 });
 
-// target last chat
+// read unread
