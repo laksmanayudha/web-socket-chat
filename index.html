@@ -7,7 +7,9 @@
     <link rel="stylesheet" href="./css/adminlte/toastr.min.css">
     <link rel="stylesheet" href="./css/adminlte/adminlte.min.css">
     <link rel="stylesheet" href="./css/adminlte/fontawesome.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"/>
     <link rel="stylesheet" href="./css/main.css">
+    <link rel="icon" href="./img/icon.png">
   </head>
   <body>
     <main class="container-fluid  p-2 d-flex flex-column justify-content-center align-items-center">
@@ -92,6 +94,9 @@
                             </div>
                             <div class="card-body">
                                 <div class="lds-dual-ring d-none" id="chatLoader">Loading...</div>
+                                <div class="chat-container-disonnect d-none" id="chatDisconnect">
+                                    <i class="text-danger fas fa-comment-slash fa-3x"></i>
+                                </div>
                                 <div class="direct-chat-messages" id="chatContainer">
                                     <div class="d-flex text-muted justify-content-center mt-2">
                                         <small>No Chat Available</small>

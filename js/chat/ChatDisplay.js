@@ -7,6 +7,12 @@ class ChatDisplay {
     this.headerRight = $(this.element.find('#chatHeaderRight'));
     this.loader = $(this.element.find('#chatLoader'));
     this.container = $(this.element.find('#chatContainer'));
+    this.reconnectButton = $('#reconnect');
+    this.connectStatusButton = $('#connectStatus');
+    this.disconnectDisplay = $('#chatDisconnect');
+    this.form = $('#chatForm');
+    this.input = $('#chatForm input');
+    this.submitButton = $('#chatForm button');
     this.messages = [];
     this.user = user;
     this.target = target;
@@ -14,6 +20,8 @@ class ChatDisplay {
     // method binding
     this.changeHeaderLeft = this.changeHeaderLeft.bind(this);
     this.changeHeaderRight = this.changeHeaderRight.bind(this);
+    this.showOffline = this.showOffline.bind(this);
+    this.showOnline = this.showOnline.bind(this);
     this.insertMessage = this.insertMessage.bind(this);
     this.notify = this.notify.bind(this);
     this.noMessage = this.noMessage.bind(this);
@@ -33,6 +41,47 @@ class ChatDisplay {
   changeHeaderRight(data) {
     this.headerRight.html(data || 'I am User');
     return this;
+  }
+
+  showOffline() {
+    this.connectStatusButton.removeClass('bg-teal');
+    this.connectStatusButton.addClass('bg-secondary');
+    this.connectStatusButton.html('Offline');
+    this.reconnectButton.attr('disabled', false);
+    this.reconnectButton.attr('value', 'offline');
+    this.disconnectDisplay.removeClass('d-none');
+    this.input.attr('disabled', true);
+    this.submitButton.attr('disabled', true);
+
+    // alert  offline
+    Swal.fire({
+      title: "You're Offline.",
+      text: 'Another connection has been made.',
+      confirmButtonText: 'Reconnect',
+      cancelButtonText: 'OK',
+      showCancelButton: true,
+      showClass: {
+        popup: 'animate__animated animate__fadeInDown'
+      },
+      hideClass: {
+        popup: 'animate__animated animate__fadeOutUp'
+      }
+    }).then(res => {
+      if (res.isConfirmed) {
+        this.reconnectButton.click();
+      }
+    });
+  }
+
+  showOnline() {
+    this.connectStatusButton.removeClass('bg-secondary');
+    this.connectStatusButton.addClass('bg-teal');
+    this.connectStatusButton.html('Online');
+    this.reconnectButton.attr('disabled', true);
+    this.reconnectButton.attr('value', 'online');
+    this.disconnectDisplay.addClass('d-none');
+    this.input.attr('disabled', false);
+    this.submitButton.attr('disabled', false);
   }
 
   insertMessage(type = 'right', {

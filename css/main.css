@@ -61,7 +61,8 @@ header button {
 }
 
 /* loader */
-.lds-dual-ring {
+.lds-dual-ring,
+.chat-container-disonnect {
     display: flex;
     flex-direction: column;
     justify-content: center;

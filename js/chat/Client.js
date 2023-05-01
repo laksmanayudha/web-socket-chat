@@ -4,6 +4,7 @@ class Client {
     this.target = null;
     this.conversation = conversation;
     this.id = null;
+    this.isOffline = true;
 
     // method binding
     this.setId = this.setId.bind(this);
@@ -21,7 +22,6 @@ class Client {
 
   from(user) {
     this.user = user;
-    this.connect();
     return this;
   }
 

@@ -28,9 +28,15 @@ conversation.start(({ connectSocket, chatSocket }) => {
 
   // connect socket
   connectSocket.addEventListener('open', function(e) {
-    client // for reconnect
-      .setId(getStorage('id'))
-      .from(getActiveUser());
+
+    if (client.isOffline) { // for reconnect
+      client
+        .setId(getStorage('id'))
+        .from(getActiveUser())
+        .to(getActiveTarget())
+        .connect();
+    }
+    
     console.log(`connect-socket [open]: web socket connection established.`);
   });
 
@@ -40,13 +46,13 @@ conversation.start(({ connectSocket, chatSocket }) => {
 
     if (type == 'connect') {
       const { user, id } = data;
-      setStorage('id', id);
+      
+      setStorage('id', id); // save connection id
       client.setId(id);
-      $('#connectStatus').removeClass('bg-secondary');
-      $('#connectStatus').addClass('bg-teal');
-      $('#connectStatus').html('Online');
-      $('#reconnect').attr('disabled', true);
-      $('#reconnect').attr('value', 'online');
+      client.isOffline = false;
+      chatDisplay.showOnline();
+      getChats();
+
       console.log(`connect-socket [message]: ${message} for user ${user}.`);
     }
 
@@ -75,11 +81,8 @@ conversation.start(({ connectSocket, chatSocket }) => {
   });
 
   connectSocket.addEventListener('close', function(e) {
-    $('#connectStatus').removeClass('bg-teal');
-    $('#connectStatus').addClass('bg-secondary');
-    $('#connectStatus').html('Offline');
-    $('#reconnect').attr('disabled', false);
-    $('#reconnect').attr('value', 'offline');
+    client.isOffline = true;
+    chatDisplay.showOffline();
     console.log(`connect-socket [close]: connection died, because ${e.reason}`);
     chatSocket.close(1000, e.reason);
   });
@@ -92,13 +95,16 @@ conversation.start(({ connectSocket, chatSocket }) => {
 
 function getChats() {
   chatDisplay
-    .changeHeaderLeft(`To: ${getActiveTarget()}`)
-    .changeHeaderRight(`I'm <strong>${getActiveUser()}</strong>`)
-    .setUserAndTarget(getActiveUser(), getActiveTarget())
+    .changeHeaderLeft(`To: ${client.target || ''}`)
+    .changeHeaderRight(`I'm <strong>${client.user || ''}</strong>`)
+    .setUserAndTarget(client.user, client.target);
+  
+  if (client.isOffline) return;
+  chatDisplay
     .showLoading()
     .getMessages(`http://${api}/chats`, { 
-      user: getActiveUser(), 
-      target: getActiveTarget()
+      user: client.user, 
+      target: client.target
     })
     .then((messages) => {
       chatDisplay
@@ -123,6 +129,8 @@ $(document).ready(async function (e) {
 
       setActiveTarget(target);
       setStorage('target', target);
+      client.to(target);
+
       getChats()
     });
   });
@@ -137,13 +145,21 @@ $(document).ready(async function (e) {
 
   $('#from').on('change', function (e) {
     setStorage('user', e.target.value);
-    client.from(e.target.value);
-    getChats();
+
+    if (client.isOffline) {
+      client
+        .from(e.target.value)
+        .reconnect();
+      return;
+    }
+
+    client
+      .from(e.target.value)
+      .connect();
   });
 
   $('#reconnect').on('click', function(e) {
     client.reconnect();
-    getChats();
   });
 
   $('#addUserForm').on('submit', async function (e) {
@@ -220,18 +236,13 @@ $(document).ready(async function (e) {
   // render to display users on UI
   document.dispatchEvent(new Event(RENDER_EVENT));
 
-  // get chats
-  getChats();
-
-  // set client
+  // set client then connect
   client
     .setId(getStorage('id'))
-    .from(getActiveUser());
-  
-    $('.toast').toast('show')
-
+    .from(getActiveUser())
+    .to(getActiveTarget())
+    .connect();
 });
 
-// send chat when offline
-// modal when disconnected
+// protect send chat when offline (retry send), pop up send chat when offline 
 // target last chat
