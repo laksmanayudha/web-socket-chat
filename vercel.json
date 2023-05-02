@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "name": "websocket-chat",
+  "name": "web-socket-chat",
   "builds": [
     {
       "src": "server.js",
