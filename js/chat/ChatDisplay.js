@@ -106,6 +106,9 @@ class ChatDisplay {
     message = '', 
     time = +new Date() 
   }) {
+    //  remove no message
+    $('.no-message').remove();
+
     let template = null;
 
     if (type == 'left') {
@@ -149,7 +152,7 @@ class ChatDisplay {
 
   noMessage() {
     this.container.html(`
-      <div class="d-flex text-muted justify-content-center mt-2">
+      <div class="d-flex text-muted justify-content-center mt-2 no-message">
           <small>No Chat Available</small>
       </div>
     `);
