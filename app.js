@@ -157,12 +157,14 @@ function getChats() {
 
 async function getUsers() {
   try {
+    $('#refreshContact i').addClass('rotate');
     const response = await fetchData(`http://${API}/users`);
     const { data } = response;
     USERS = data.users;
   } catch (error) {
     console.log(error.message)
   }
+  $('#refreshContact i').removeClass('rotate');
 }
 
 async function getLastChatsFor(user) {
@@ -207,6 +209,12 @@ $(document).ready(async function (e) {
   $('#closeSidebar').on('click', function (e) {
     $('.sidebar').removeClass('sidebar--open');
   });
+
+  $('#refreshContact').on('click', async function(e) {
+    e.preventDefault();
+    await getUsers();
+    document.dispatchEvent(new Event(RENDER_EVENT));
+  })
 
   $('#from').on('change', function (e) {
     setStorage('user', e.target.value);

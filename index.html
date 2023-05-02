@@ -24,10 +24,15 @@
                 </div>
                 <div class="mt-2">
                     <form action="#" id="addUserForm" name="addUserForm">
-                        <div class="card card-outline card-maroon">
+                        <div class="card card-outline card-maroon collapsed-card">
                             <div class="card-header">
                                 <div class="card-title">
                                     <h5>Add User</h5>
+                                </div>
+                                <div class="card-tools">
+                                    <button type="button" class="btn btn-tool" data-card-widget="collapse">
+                                        <i class="fas fa-plus"></i>
+                                    </button>
                                 </div>
                             </div>
                             <div class="card-body">
@@ -69,8 +74,12 @@
                                     <span>Reconnect</span>
                                 </button>
                             </div>
+                            <hr>
                             <div class="form-group">
-                                <label for="target">Contact</label>
+                                <label for="target">
+                                    Contact
+                                    <a href="#" id="refreshContact"><i class="fas fa-sync-alt"></i></a>
+                                </label>
                                 <input type="hidden" name="target" id="target">
                                 <ul class="contact-lists px-2" id=" contactLists">
                                     <!-- contact item -->

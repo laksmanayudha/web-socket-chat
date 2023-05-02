@@ -59,7 +59,7 @@ function debug(state) {
     console.log('\n')
 }
 
-function withThrottling(callback, delay = 1500) {
+function withThrottling(callback, delay = 1000) {
     setTimeout(() => {
         callback()
     }, delay);
@@ -327,7 +327,10 @@ const server = http.createServer((req, res) => {
                     message: 'Success Get Users',
                     data: { users },
                 };
-                res.end(JSON.stringify(data));
+                
+                withThrottling(() => {
+                    res.end(JSON.stringify(data));
+                });
                 break;
 
             case '/chats':
