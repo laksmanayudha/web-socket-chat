@@ -8,21 +8,21 @@ let clients = [];
 const users = [
     {
         name: 'Yudha',
-        id: 'yudha',
+        id: makeid(7),
     },
     {
         name: 'Santhi',
-        id: 'santhi',
+        id: makeid(7)
     },
     {
         name: 'Laksmana',
-        id: 'laksmana',
+        id: makeid(7)
     },
 ];
 
 const chats = [
     {
-        id: 1,
+        id: makeid(5),
         user: users[1].name,
         target: users[0].name,
         message: 'Hi',
@@ -30,12 +30,12 @@ const chats = [
         isRead: true,
     },
     {
-        id: 2,
+        id: makeid(5),
         user: users[0].name,
         target: users[1].name,
         message: 'How are you?',
         time: +new Date('2023-03-28 09:10:00'),
-        isRead: false,
+        isRead: true,
     },
 ];
 

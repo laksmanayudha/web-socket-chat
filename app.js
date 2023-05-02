@@ -7,7 +7,7 @@ import {
   setActiveUser,
   getActiveUser,
   displayDefaultActiveTarget,
-  loadUsers,
+  init,
 } from './js/helper.js';
 
 import {
@@ -17,10 +17,11 @@ import {
 
 let USERS = [];
 let LASTCHATS = {};
-const api = 'localhost:8080';
+let UNREADS = [];
+const API = 'localhost:8080';
 const RENDER_EVENT = 'RENDER_EVENT';
 const chatDisplay = new ChatDisplay('#chatDisplay');
-const conversation = new Conversation({ connectUrl: `${api}/ws-connect`, chatUrl: `${api}/ws-chat` });
+const conversation = new Conversation({ connectUrl: `${API}/ws-connect`, chatUrl: `${API}/ws-chat` });
 const client = conversation.Client;
 
 // start conversation
@@ -83,7 +84,7 @@ conversation.start(({ connectSocket, chatSocket }) => {
           });
         }
         
-        if ( // target not active, notify the user
+        if ( // target not active, notify the user, push to unread
             client.user === chat.target && 
             getActiveTarget() !== chat.user && 
             getActiveTarget !== client.user
@@ -93,11 +94,13 @@ conversation.start(({ connectSocket, chatSocket }) => {
             message: chat.message,
             time: chat.time,
           });
+          insertUnread(chat.id);
         }
         
         insertLastChat(chat.user, chat); // push last chat to related user
         console.log(`connect-socket [message]: Message received from ${chat.user}`);
       }
+      
       document.dispatchEvent(new Event(RENDER_EVENT));
     }
   });
@@ -116,6 +119,17 @@ conversation.start(({ connectSocket, chatSocket }) => {
   });
 });
 
+function insertUnread(chat) {
+    UNREADS.push(chat);
+}
+
+function removeUnread(target) {
+    if (Object.keys(LASTCHATS).length <= 0) return;
+    let targetChats = LASTCHATS.to[target] || [];
+    let removedChatids = targetChats.map(({ id }) => id);
+    UNREADS = UNREADS.filter((unreadId) => !removedChatids.includes(unreadId));
+}
+
 function insertLastChat(target, chat) {
   if (LASTCHATS.to[target].find(({ id }) => id === chat.id)) return;
   LASTCHATS.to[target].push(chat);
@@ -130,7 +144,7 @@ function getChats() {
   if (client.isOffline) return;
   chatDisplay
     .showLoading()
-    .getMessages(`http://${api}/chats`, { 
+    .getMessages(`http://${API}/chats`, { 
       user: client.user, 
       target: client.target
     })
@@ -143,7 +157,7 @@ function getChats() {
 
 async function getUsers() {
   try {
-    const response = await fetchData(`http://${api}/users`);
+    const response = await fetchData(`http://${API}/users`);
     const { data } = response;
     USERS = data.users;
   } catch (error) {
@@ -153,7 +167,7 @@ async function getUsers() {
 
 async function getLastChatsFor(user) {
   try {
-    const { data } = await fetchData(`http://${api}/last-chats?forUser=${user}`);
+    const { data } = await fetchData(`http://${API}/last-chats?forUser=${user}`);
     const toUser = {};
     data.lastChats.forEach(lastChat => { toUser[lastChat.name] = lastChat.chats });
     LASTCHATS = { from: user, to: toUser };
@@ -166,7 +180,7 @@ $(document).ready(async function (e) {
 
   // event listeners
   document.addEventListener(RENDER_EVENT, function () {
-    loadUsers(USERS, LASTCHATS);
+    init(USERS, LASTCHATS, UNREADS);
     setActiveUser(getStorage('user'));
     setActiveTarget(getStorage('target'));
     displayDefaultActiveTarget(getStorage('target'));
@@ -180,7 +194,9 @@ $(document).ready(async function (e) {
       setStorage('target', target);
       client.to(target);
 
-      getChats()
+      getChats();
+      removeUnread(client.target);
+      document.dispatchEvent(new Event(RENDER_EVENT));
     });
   });
 
@@ -219,7 +235,7 @@ $(document).ready(async function (e) {
 
     if (!user) return;
     try {
-      const response = await fetchData(`http://${api}/users`, {
+      const response = await fetchData(`http://${API}/users`, {
         method: 'POST',
         body: JSON.stringify({ user })
       });

@@ -38,7 +38,7 @@ function displayDefaultActiveTarget(activeTarget) {
 }
 
 
-function loadUsers(users = [], lastChats = {}) {
+function init(users = [], lastChats = {}, unreads = []) {
 
     function lastChatFor(target) {
         let defaultData = {
@@ -60,6 +60,14 @@ function loadUsers(users = [], lastChats = {}) {
         }
         
         return defaultData
+    }
+
+    function findUnread(target) {
+        if (Object.keys(lastChats).length <= 0) return [];
+
+        let chats = lastChats.to[target] || [];
+        let messages = chats.filter((chat) => unreads.includes(chat.id));
+        return messages;
     }
 
     // set user select
@@ -84,8 +92,19 @@ function loadUsers(users = [], lastChats = {}) {
         const { message, time } = lastChatFor(user.name);
         content.querySelector('.user-thumb-name').innerHTML = user.name;
         content.querySelector('.user-thumb-message').innerHTML = message;
-        content.querySelector('.user-thumb-message_time').innerHTML = time ? dayjs(time).format('DD/MM/YYYY HH:mm') : '';
+        content.querySelector('.user-thumb-message_time').innerHTML = time ? dayjs(time).format('DD/MM/YYYY HH:mm') : ''; 
         content.querySelector('[name="userThumbName"]').value = user.name;
+
+        const unreadCount = findUnread(user.name).length;
+        if (unreadCount) {
+            content.querySelector('.user-thumb-message_unread').innerHTML = unreadCount;
+            content.querySelector('.user-thumb-message_unread').classList.add('badge');
+            content.querySelector('.user-thumb-message_unread').classList.add('badge-info');
+        } else {
+            content.querySelector('.user-thumb-message_unread').innerHTML = '';
+            content.querySelector('.user-thumb-message_unread').classList.remove('badge');
+            content.querySelector('.user-thumb-message_unread').classList.remove('badge-info');
+        }
         $('.contact-lists').append(content);
     });
 }
@@ -98,6 +117,6 @@ export {
     getActiveTarget,
     setActiveUser,
     getActiveUser,
-    loadUsers,
+    init,
     displayDefaultActiveTarget,
 };
