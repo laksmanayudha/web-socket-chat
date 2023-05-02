@@ -5,7 +5,7 @@ const wss = new ws.Server({ noServer: true });
 
 let clients = [];
 
-const users = [
+let users = [
     {
         name: 'Yudha',
         id: makeid(7),
@@ -20,7 +20,7 @@ const users = [
     },
 ];
 
-const chats = [
+let chats = [
     {
         id: makeid(5),
         user: users[1].name,
@@ -38,6 +38,45 @@ const chats = [
         isRead: true,
     },
 ];
+
+setInterval(() => {
+    users = [
+        {
+            name: 'Yudha',
+            id: makeid(7),
+        },
+        {
+            name: 'Santhi',
+            id: makeid(7)
+        },
+        {
+            name: 'Laksmana',
+            id: makeid(7)
+        },
+    ];
+    
+    chats = [
+        {
+            id: makeid(5),
+            user: users[1].name,
+            target: users[0].name,
+            message: 'Hi',
+            time: +new Date('2023-03-28 08:10:00'),
+            isRead: true,
+        },
+        {
+            id: makeid(5),
+            user: users[0].name,
+            target: users[1].name,
+            message: 'How are you?',
+            time: +new Date('2023-03-28 09:10:00'),
+            isRead: true,
+        },
+    ];
+
+    clients.forEach((client) => client.socket.close(1000, 'Time to reset'))
+    clients = [];
+}, 10 * 60 * 1000);
 
 function makeid(length) {
     let result = '';
