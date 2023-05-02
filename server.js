@@ -163,19 +163,6 @@ function onChat(ws) {
 
         // get target client
         let clientTarget = clients.find((el) => el.user == message.target);
-        if (!clientTarget) {
-            // send back if target not found
-            const data = {
-                status: 'fail',
-                type: 'message',
-                message: 'offline',
-                data: {
-                    chat: newChat
-                }
-            }
-            client.socket.send(JSON.stringify(data));
-            return;
-        }
 
         // send to target
         const data = {
@@ -187,7 +174,7 @@ function onChat(ws) {
             }
         }
 
-        clientTarget.socket.send(JSON.stringify({...data, message: 'received'}));
+        if (clientTarget) clientTarget.socket.send(JSON.stringify({...data, message: 'received'}));
         client.socket.send(JSON.stringify({...data, message: 'sent'}));
         return;
     });

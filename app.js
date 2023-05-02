@@ -64,9 +64,6 @@ conversation.start(({ connectSocket, chatSocket }) => {
 
     if (type == 'message') { // on message sent or received
       const { chat } = data;
-
-      if (message == 'offline')
-        console.log(`connect-socket [message]: User ${chat.target} offline.`);
       
       if (message == 'sent') {
         insertLastChat(chat.target, chat); // push last chat to related target
