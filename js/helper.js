@@ -41,20 +41,25 @@ function displayDefaultActiveTarget(activeTarget) {
 function loadUsers(users = [], lastChats = {}) {
 
     function lastChatFor(target) {
-        let lastChat = lastChats.to[target];
+        let defaultData = {
+            message: 'No message',
+            time: null,
+        };
 
+        // check lastChasts is empty object
+        if (Object.keys(lastChats).length <= 0) return defaultData;
+
+        // get target last chat
+        let lastChat = lastChats.to[target] || [];
         if (lastChat.length > 0) {
             let { message, time, user } = lastChat[lastChat.length - 1];
             message = user === lastChats.from
                         ? `<i class="fas fa-check"></i> ${message}`
                         : message;
-            return { message, time };
+            return { ...defaultData, message, time };
         }
         
-        return {
-            message: 'No message',
-            time: null,
-        };
+        return defaultData
     }
 
     // set user select

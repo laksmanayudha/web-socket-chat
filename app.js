@@ -230,7 +230,7 @@ $(document).ready(async function (e) {
       if (response.status != 'success') throw new Error(response.message);
 
       //  add users if not error
-      users = [...users, response.data.user];
+      USERS = [...USERS, response.data.user];
 
       Swal.fire({
         position: 'top-end',
@@ -250,9 +250,9 @@ $(document).ready(async function (e) {
       });
     }
 
-    // reset input form
-    $(this).find('input').val('');
-    document.dispatchEvent(new Event(RENDER_EVENT));
+    $(this).find('input').val(''); // reset form add user
+    await getLastChatsFor(client.user); //get last chat for new added user
+    document.dispatchEvent(new Event(RENDER_EVENT)); // rerender
   });
 
   $('#chatForm').on('submit', function (e) {
@@ -279,8 +279,6 @@ $(document).ready(async function (e) {
 
   // initial data
   await getUsers(); // get users
-  await getLastChatsFor(getStorage('user'));  // last chats thumb for active user
-
 
   // render to display users on UI
   document.dispatchEvent(new Event(RENDER_EVENT));
@@ -292,5 +290,3 @@ $(document).ready(async function (e) {
     .to(getActiveTarget())
     .connect();
 });
-
-// read unread
