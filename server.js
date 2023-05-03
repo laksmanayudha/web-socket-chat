@@ -440,6 +440,4 @@ const server = http.createServer((req, res) => {
                 break;
         }
     }
-}).listen(8080, () => {
-    console.log('Running on http://localhost:8080');
-});
+}).listen(8080);
