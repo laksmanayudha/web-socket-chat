@@ -100,7 +100,7 @@ function debug(state) {
     console.log('\n')
 }
 
-function withThrottling(callback, delay = 1000) {
+function withThrottling(callback, delay = 0) {
     setTimeout(() => {
         callback()
     }, delay);
@@ -396,7 +396,7 @@ const server = http.createServer((req, res) => {
 
                     withThrottling(() => {
                         res.end(JSON.stringify(data));
-                    }, 300);
+                    }, 0);
                 });
                 break;
 
