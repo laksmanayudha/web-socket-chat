@@ -1,8 +1,8 @@
-const http = new require('http');
-const url = new require('url');
-const ws = new require('ws');
+const http = require('http');
+const url = require('url');
+const ws = require('ws');
 const wss = new ws.Server({ noServer: true });
-const PORT = 3000;
+const PORT = 8080;
 const HOSTNAME = 'localhost';
 
 let clients = [];
