@@ -2,7 +2,7 @@ const http = require('http');
 const url = require('url');
 const ws = require('ws');
 const wss = new ws.WebSocketServer({ noServer: true });
-const PORT = 3000;
+const PORT = process.env.PORT || 3000;
 const HOSTNAME = 'localhost';
 
 let clients = [];
@@ -442,7 +442,7 @@ const server = http.createServer((req, res) => {
                 break;
         }
     }
-}).listen(PORT, () => {
+}).listen(PORT, '0.0.0.0', () => {
     // console.log(`Server running on http://${HOSTNAME}:${PORT}`);
-    console.log('server running');
+    console.log(`server running on port ${PORT}`);
 });
