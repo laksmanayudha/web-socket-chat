@@ -442,6 +442,6 @@ const server = http.createServer((req, res) => {
                 break;
         }
     }
-}).listen(PORT, HOSTNAME, () => {
-    console.log(`Server running on http://${HOSTNAME}:${PORT}`);
+}).listen(PORT, () => {
+    // console.log(`Server running on http://${HOSTNAME}:${PORT}`);
 });
