@@ -1,7 +1,7 @@
 const http = require('http');
 const url = require('url');
 const ws = require('ws');
-const wss = new ws.Server({ noServer: true });
+const wss = new ws.WebSocketServer({ noServer: true });
 const PORT = 8080;
 const HOSTNAME = 'localhost';
 
