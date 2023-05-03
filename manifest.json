@@ -1,0 +1,16 @@
+{
+    "name": "Simple Chats",
+    "short_name": "S'Chats",
+    "start_url": "index.html",
+    "display": "standalone",
+    "background_color": "white",
+    "theme_color": "white",
+    "orientation": "portrait-primary",
+    "icons": [
+        {
+            "src": "/img/icon.png",
+            "type": "image/png",
+            "sizes": "107x107"
+        }
+    ]
+}

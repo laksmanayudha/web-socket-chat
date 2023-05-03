@@ -18,11 +18,11 @@ import {
 let USERS = [];
 let LASTCHATS = {};
 let UNREADS = [];
-const API = 'web-socket-chat-production.up.railway.app';
-const PROTOCOL = 'https';
+const API = 'localhost:3000';
+const PROTOCOL = 'http';
 const RENDER_EVENT = 'RENDER_EVENT';
 const chatDisplay = new ChatDisplay('#chatDisplay');
-const conversation = new Conversation({ connectUrl: `${API}/ws-connect`, chatUrl: `${API}/ws-chat`, protocol: 'wss' });
+const conversation = new Conversation({ connectUrl: `${API}/ws-connect`, chatUrl: `${API}/ws-chat`, protocol: 'ws' });
 const client = conversation.Client;
 
 // start conversation
