@@ -22,7 +22,7 @@ const API = 'web-socket-chat-production.up.railway.app';
 const PROTOCOL = 'https';
 const RENDER_EVENT = 'RENDER_EVENT';
 const chatDisplay = new ChatDisplay('#chatDisplay');
-const conversation = new Conversation({ connectUrl: `${API}/ws-connect`, chatUrl: `${API}/ws-chat`, protocol: 'ws' });
+const conversation = new Conversation({ connectUrl: `${API}/ws-connect`, chatUrl: `${API}/ws-chat`, protocol: 'wss' });
 const client = conversation.Client;
 
 // start conversation
