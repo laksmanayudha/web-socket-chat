@@ -18,7 +18,8 @@ import {
 let USERS = [];
 let LASTCHATS = {};
 let UNREADS = [];
-const API = 'localhost:8080';
+const API = 'localhost:3000';
+const PROTOCOL = 'http';
 const RENDER_EVENT = 'RENDER_EVENT';
 const chatDisplay = new ChatDisplay('#chatDisplay');
 const conversation = new Conversation({ connectUrl: `${API}/ws-connect`, chatUrl: `${API}/ws-chat` });
@@ -144,7 +145,7 @@ function getChats() {
   if (client.isOffline) return;
   chatDisplay
     .showLoading()
-    .getMessages(`http://${API}/chats`, { 
+    .getMessages(`${PROTOCOL}://${API}/chats`, { 
       user: client.user, 
       target: client.target
     })
@@ -158,7 +159,7 @@ function getChats() {
 async function getUsers() {
   try {
     $('#refreshContact i').addClass('rotate');
-    const response = await fetchData(`http://${API}/users`);
+    const response = await fetchData(`${PROTOCOL}://${API}/users`);
     const { data } = response;
     USERS = data.users;
   } catch (error) {
@@ -169,7 +170,7 @@ async function getUsers() {
 
 async function getLastChatsFor(user) {
   try {
-    const { data } = await fetchData(`http://${API}/last-chats?forUser=${user}`);
+    const { data } = await fetchData(`${PROTOCOL}://${API}/last-chats?forUser=${user}`);
     const toUser = {};
     data.lastChats.forEach(lastChat => { toUser[lastChat.name] = lastChat.chats });
     LASTCHATS = { from: user, to: toUser };
@@ -243,7 +244,7 @@ $(document).ready(async function (e) {
 
     if (!user) return;
     try {
-      const response = await fetchData(`http://${API}/users`, {
+      const response = await fetchData(`${PROTOCOL}://${API}/users`, {
         method: 'POST',
         body: JSON.stringify({ user })
       });

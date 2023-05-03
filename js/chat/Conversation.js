@@ -1,9 +1,10 @@
 import Client from "./Client.js";
 
 class Conversation {
-  constructor({ connectUrl = '', chatUrl = '' }) {
+  constructor({ connectUrl = '', chatUrl = '', protocol = 'ws' }) {
     this.connectUrl = connectUrl;
     this.chatUrl = chatUrl;
+    this.protocol = protocol;
     this.Client = null;
     this.connectSocket = null;
     this.chatSocket = null;
@@ -25,8 +26,8 @@ class Conversation {
 
   connect() {
     try {
-      this.connectSocket = new WebSocket(`ws://${this.connectUrl}`);
-      this.chatSocket = new WebSocket(`ws://${this.chatUrl}`);
+      this.connectSocket = new WebSocket(`${this.protocol}://${this.connectUrl}`);
+      this.chatSocket = new WebSocket(`${this.protocol}://${this.chatUrl}`);
     } catch (error) {
       console.log(error.message);
     }

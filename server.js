@@ -2,6 +2,8 @@ const http = new require('http');
 const url = new require('url');
 const ws = new require('ws');
 const wss = new ws.Server({ noServer: true });
+const PORT = 3000;
+const HOSTNAME = 'localhost';
 
 let clients = [];
 
@@ -429,7 +431,7 @@ const server = http.createServer((req, res) => {
                     res.end(JSON.stringify(data));
                 });
                 break;
-                
+
             default:
                 data = {
                     status: 'fail',
@@ -440,4 +442,6 @@ const server = http.createServer((req, res) => {
                 break;
         }
     }
-}).listen(8080);
+}).listen(PORT, HOSTNAME, () => {
+    console.log(`Server running on http://${HOSTNAME}:${PORT}`);
+});
