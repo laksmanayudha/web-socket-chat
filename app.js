@@ -18,7 +18,7 @@ import {
 let USERS = [];
 let LASTCHATS = {};
 let UNREADS = [];
-const API = 'localhost:8080';
+const API = 'localhost:3000';
 const PROTOCOL = 'http';
 const RENDER_EVENT = 'RENDER_EVENT';
 const chatDisplay = new ChatDisplay('#chatDisplay');
