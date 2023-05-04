@@ -11,6 +11,26 @@
             "src": "/img/icon.png",
             "type": "image/png",
             "sizes": "144x144"
+        },
+        {
+            "src": "/img/icon152x152.png",
+            "type": "image/png",
+            "sizes": "152x152"
+        },
+        {
+            "src": "/img/icon192x192.png",
+            "type": "image/png",
+            "sizes": "192x192"
+        },
+        {
+            "src": "/img/icon382x382.png",
+            "type": "image/png",
+            "sizes": "382x382"
+        },
+        {
+            "src": "/img/icon512x512.png",
+            "type": "image/png",
+            "sizes": "512x512"
         }
     ]
 }
