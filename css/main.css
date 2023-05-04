@@ -156,8 +156,12 @@ header button {
         opacity: 0;
     }
 
-    .toast {
+    #toastsContainerTopRight {
         width: 100% !important;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        padding: .5em;
     }
 
     #chatDisplay {
@@ -169,5 +173,9 @@ header button {
         margin: 0 !important;
         border-radius: 0;
         z-index: 1000;
+    }
+
+    #chatContainer {
+        height: 100% !important;
     }
 }
