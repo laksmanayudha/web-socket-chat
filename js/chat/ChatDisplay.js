@@ -160,7 +160,7 @@ class ChatDisplay {
   }
 
   showLoading() {
-    this.loader.removeClass('d-none')
+    this.loader.removeClass('d-none');
     return this;
   }
 

@@ -111,6 +111,7 @@ header button {
     animation: rotate 1s linear infinite;
 }
 
+
 @keyframes connecting {
     0% {
         opacity: 1;
@@ -150,12 +151,23 @@ header button {
         left: 0;
         bottom: 0;
         background-color: rgba(65, 65, 65, 0.8);
-        z-index: 999;
+        z-index: 1001;
         transform: translate(-1000px);
         opacity: 0;
     }
 
     .toast {
         width: 100% !important;
+    }
+
+    #chatDisplay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        margin: 0 !important;
+        border-radius: 0;
+        z-index: 1000;
     }
 }
