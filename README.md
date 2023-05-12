@@ -26,6 +26,7 @@ The way this application works is first, every time the application is opened, t
 I also implemented a little PWA in the application so that it can be installed on mobile devices so that users can experience using mobile applications via the web.
 
 ======
+
 Hi Everyone. Kali ini saya mencoba untuk mengimplementasikan web socket untuk membuat aplikasi chat bernama S'Chats (Simple Chats) menggunakan node.js sebagai backendnya dan sedikit PWA (Progressive Web Apps) agar dapat diinstall pada mobile device.
 
 Web socket merupakan protokol komunikasi pada komputer yang menyediakan saluran komunikasi dua arah secara bersamaan (full-duplex). Protokol ini memungkinkan server mengirim pesan langsung ke klien tanpa adanya terlebih dahulu request oleh klien. Oleh karena itu, web socket memungkinkan perpindahan data secara real-time. Seperti contohnya pada aplikasi chat.
